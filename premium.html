@@ -1,270 +1,182 @@
+
 <!DOCTYPE html>
-
 <html lang="en">
-
 <head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Upgrade to Premium - Anthropology QCAB</title>
-
-<style>
-
-:root {
-
-    --primary: #16a34a;
-
-    --primary-dark: #15803d;
-
-    --bg: #f0fdf4;
-
-    --card: #ffffff;
-
-    --text: #14532d;
-
-    --muted: #6b7280;
-
-    --border: #bbf7d0;
-
-}
-
-* {
-
-    box-sizing: border-box;
-
-}
-
-body {
-
-    margin: 0;
-
-    font-family: Arial, Helvetica, sans-serif;
-
-    background:
-
-        radial-gradient(circle at top left, #dcfce7 0%, transparent 35%),
-
-        radial-gradient(circle at bottom right, #d1fae5 0%, transparent 30%),
-
-        var(--bg);
-
-    color: var(--text);
-
-}
-
-.container {
-
-    max-width: 1000px;
-
-    margin: 0 auto;
-
-    padding: 40px 20px;
-
-}
-
-h1 {
-
-    text-align: center;
-
-    margin-bottom: 8px;
-
-    color: #166534;
-
-    letter-spacing: -0.5px;
-
-}
-
-.subtitle {
-
-    text-align: center;
-
-    color: var(--muted);
-
-    margin-bottom: 35px;
-
-}
-
-.card {
-
-    background: var(--card);
-
-    border: 1px solid var(--border);
-
-    border-radius: 12px;
-
-    padding: 25px;
-
-    margin-bottom: 25px;
-
-    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.07);
-
-}
-
-.comparison {
-
-    width: 100%;
-
-    border-collapse: collapse;
-
-    margin-top: 20px;
-
-}
-
-.comparison th,
-
-.comparison td {
-
-    border: 1px solid var(--border);
-
-    padding: 14px;
-
-    text-align: center;
-
-}
-
-.comparison th {
-
-    background: #dcfce7;
-
-    color: #166534;
-
-    font-size: 16px;
-
-}
-
-.comparison td:first-child {
-
-    text-align: left;
-
-    font-weight: 600;
-
-    color: #374151;
-
-}
-
-.check {
-
-    color: #15803d;
-
-    font-weight: 700;
-
-}
-
-.premium-price {
-
-    text-align: center;
-
-    margin: 30px 0 20px;
-
-}
-
-.premium-price .price {
-
-    font-size: 32px;
-
-    font-weight: 700;
-
-    color: #166534;
-
-}
-
-.premium-price .duration {
-
-    font-size: 15px;
-
-    color: var(--muted);
-
-    margin-top: 5px;
-
-}
-
-.upgrade-section {
-
-    text-align: center;
-
-}
-
-.upgrade-button {
-
-    border: none;
-
-    border-radius: 8px;
-
-    padding: 13px 28px;
-
-    font-size: 16px;
-
-    font-weight: 600;
-
-    cursor: pointer;
-
-    background: var(--primary);
-
-    color: white;
-
-    transition: background 0.15s ease, transform 0.15s ease;
-
-}
-
-.upgrade-button:hover {
-
-    background: var(--primary-dark);
-
-    transform: translateY(-1px);
-
-}
-
-.back-button {
-
-    display: block;
-
-    margin: 20px auto 0;
-
-    border: none;
-
-    background: none;
-
-    color: var(--primary);
-
-    font-size: 14px;
-
-    cursor: pointer;
-
-}
-
-.back-button:hover {
-
-    text-decoration: underline;
-
-}
-
-@media (max-width: 600px) {
-
-    .container {
-
-        padding: 25px 12px;
-
-    }
-
-    .card {
-
-        padding: 15px;
-
-        overflow-x: auto;
-
-    }
-
-    .comparison {
-
-        min-width: 650px;
-
-    }
-
-}
-
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Upgrade to Premium - GS QCAB</title>
+
+    <!-- Razorpay Checkout -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: linear-gradient(135deg, #f5f3ff, #ffffff);
+            color: #222;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 18px;
+            padding: 40px;
+            box-shadow: 0 10px 35px rgba(0,0,0,0.08);
+            text-align: center;
+        }
+
+        h1 {
+            color: #16a34a;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 17px;
+            margin-bottom: 30px;
+        }
+
+        .price {
+            font-size: 48px;
+            font-weight: bold;
+            color: #111827;
+            margin: 20px 0 5px;
+        }
+
+        .duration {
+            color: #666;
+            margin-bottom: 8px;
+        }
+
+        .one-time {
+            color: #777;
+            font-size: 13px;
+            margin-bottom: 30px;
+        }
+
+        .features {
+            text-align: left;
+            max-width: 600px;
+            margin: 30px auto;
+        }
+
+        .features div {
+            padding: 12px 0;
+            border-bottom: 1px solid #eee;
+            font-size: 16px;
+        }
+
+        .features div::before {
+            content: "✓";
+            color: #16a34a;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .comparison {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 35px 0;
+        }
+
+        .comparison th,
+        .comparison td {
+            padding: 14px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .comparison th {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .comparison td:first-child {
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .upgrade-btn {
+            width: 100%;
+            max-width: 450px;
+            padding: 17px 25px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #16a34a, #15803d);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .upgrade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(21, 128, 61, 0.25);
+        }
+
+        .upgrade-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .back-btn {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #16a34a;
+            font-weight: 600;
+        }
+
+        .status {
+            margin-top: 20px;
+            font-size: 15px;
+            min-height: 22px;
+        }
+
+        .security {
+            margin-top: 25px;
+            color: #777;
+            font-size: 13px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px auto;
+                padding: 12px;
+            }
+
+            .card {
+                padding: 25px 18px;
+            }
+
+            h1 {
+                font-size: 28px;
+            }
+
+            .price {
+                font-size: 40px;
+            }
+
+            .comparison {
+                font-size: 13px;
+            }
+        }
+    </style>
 
 </head>
 
@@ -272,177 +184,486 @@ h1 {
 
 <div class="container">
 
-<h1>Upgrade to Premium</h1>
+    <div class="card">
 
-<p class="subtitle">
+        <h1>Upgrade to Premium</h1>
 
-Get complete access to the Anthropology QCAB question bank.
+        <div class="subtitle">
+            GS QCAB — Premium Access
+        </div>
 
+        <div class="price">
+            ₹499
+        </div>
 
-</p>
+        <div class="duration">
+            Premium access for 6 months
+        </div>
 
-<div class="card">
+        <div class="one-time">
+            One-time payment • 6 months access
+        </div>
 
+        <table class="comparison">
 
-<table class="comparison">
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Free Plan</th>
+                    <th>Premium Plan</th>
+                </tr>
+            </thead>
 
-    <thead>
+            <tbody>
 
-        <tr>
+                <tr>
+                    <td>PYQ Access</td>
+                    <td>2026 only</td>
+                    <td>All available years up to 2026</td>
+                </tr>
 
-            <th>Feature</th>
+                <tr>
+                    <td>Topic-wise Questions</td>
+                    <td>Limited to 2026 only</td>
+                    <td>All available years</td>
+                </tr>
 
-            <th>Free Plan</th>
+                <tr>
+                    <td>QCAB Generation</td>
+                    <td>Limited</td>
+                    <td>Unlimited QCAB generation &amp; downloads</td>
+                </tr>
 
-            <th>Premium Plan</th>
+                <tr>
+                    <td>Validity</td>
+                    <td>Free</td>
+                    <td>6 months</td>
+                </tr>
 
-        </tr>
+                <tr>
+                    <td>Revision &amp; Preparation</td>
+                    <td>Limited</td>
+                    <td>Better revision and study preparation</td>
+                </tr>
 
-    </thead>
+            </tbody>
 
-    <tbody>
+        </table>
 
-        <tr>
+        <button
+            id="upgradeButton"
+            class="upgrade-btn"
+            onclick="startPayment()"
+        >
+            Upgrade for ₹499
+        </button>
 
-            <td>Question access</td>
+        <div class="security">
+            🔒 Secure payment powered by Razorpay
+        </div>
 
-            <td>2026 questions only</td>
+        <div id="status" class="status"></div>
 
-            <td>All available years</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Paper I</td>
-
-            <td class="check">✓</td>
-
-            <td class="check">✓</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Paper II</td>
-
-            <td class="check">✓</td>
-
-            <td class="check">✓</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Topic-wise questions</td>
-
-            <td>2026 only</td>
-
-            <td class="check">✓</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Year-wise questions</td>
-
-            <td>2026 only</td>
-
-            <td>All available years</td>
-
-        </tr>
-
-        <tr>
-
-            <td>QCAB generation & download</td>
-
-            <td class="check">✓</td>
-
-            <td class="check">✓</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Validity</td>
-
-            <td>Free</td>
-
-            <td>6 months</td>
-
-        </tr>
-
-        <tr>
-
-            <td>Price</td>
-
-            <td>₹0</td>
-
-            <td>₹499</td>
-
-        </tr>
-
-    </tbody>
-
-</table>
-
-<div class="premium-price">
-
-    <div class="price">
-
-        ₹499
-
-    </div>
-
-    <div class="duration">
-
-        Premium access for 6 months
+        <a href="index.html" class="back-btn">
+            ← Back to GS QCAB
+        </a>
 
     </div>
 
 </div>
 
-<div class="upgrade-section">
+<script>
 
-    <button
+    /* =========================================
+       SUPABASE CONFIGURATION
+    ========================================= */
 
-        class="upgrade-button"
+    const SUPABASE_URL =
+        "https://uggewxzqnwjzhebfempx.supabase.co";
 
-        type="button"
+    const SUPABASE_ANON_KEY =
+        "sb_publishable_xHqv4APZiUkYh0wSDO93zg_7y8_uHjP";
 
-        onclick="alert('Payment gateway will be connected here soon.For immediate access, write to cds2gc@gmail.com for paid access. You will get reply within 24 hours.');"
+    const CREATE_ORDER_URL =
+        SUPABASE_URL +
+        "/functions/v1/create-razorpay-order";
 
-    >
-
-        Upgrade to Premium — ₹499
-
-    </button>
-
-</div>
-
-
-</div>
-
-<button
+    const VERIFY_PAYMENT_URL =
+        SUPABASE_URL +
+        "/functions/v1/verify-razorpay-payment";
 
 
-class="back-button"
+    /* =========================================
+       SUPABASE CLIENT
+    ========================================= */
 
-type="button"
-
-onclick="window.location.href='index.html';"
-
-
->
-
-
-← Back to QCAB Generator
+    window.supabaseClient =
+        supabase.createClient(
+            SUPABASE_URL,
+            SUPABASE_ANON_KEY
+        );
 
 
-</button>
+    /* =========================================
+       STATUS HELPER
+    ========================================= */
 
-</div>
+    function setStatus(message) {
+
+        document.getElementById("status").textContent = message;
+
+    }
+
+
+    /* =========================================
+       START PAYMENT
+    ========================================= */
+
+    async function startPayment() {
+
+        const button =
+            document.getElementById("upgradeButton");
+
+        try {
+
+            button.disabled = true;
+
+            setStatus("Checking your account...");
+
+
+            /* -----------------------------------------
+               1. CHECK LOGIN
+            ----------------------------------------- */
+
+            const {
+                data: {
+                    session
+                },
+                error: sessionError
+            } =
+                await window.supabaseClient.auth.getSession();
+
+
+            if (sessionError) {
+
+                throw sessionError;
+
+            }
+
+
+            if (!session) {
+
+                setStatus("");
+
+                alert(
+                    "Please login first before upgrading to Premium."
+                );
+
+                button.disabled = false;
+
+                return;
+
+            }
+
+
+            const accessToken =
+                session.access_token;
+
+            const user =
+                session.user;
+
+
+            /* -----------------------------------------
+               2. CREATE RAZORPAY ORDER
+            ----------------------------------------- */
+
+            setStatus(
+                "Preparing secure payment..."
+            );
+
+
+            const orderResponse =
+                await fetch(
+                    CREATE_ORDER_URL,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Authorization":
+                                "Bearer " +
+                                accessToken,
+
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({})
+                    }
+                );
+
+
+            const orderData =
+                await orderResponse.json();
+
+
+            if (!orderResponse.ok) {
+
+                throw new Error(
+                    orderData.error ||
+                    "Unable to create payment order."
+                );
+
+            }
+
+
+            if (!orderData.order_id) {
+
+                throw new Error(
+                    "Razorpay order ID was not returned."
+                );
+
+            }
+
+
+            /* -----------------------------------------
+               3. OPEN RAZORPAY CHECKOUT
+            ----------------------------------------- */
+
+            setStatus(
+                "Opening secure payment..."
+            );
+
+
+            const options = {
+
+                key:
+                    orderData.key_id,
+
+                amount:
+                    orderData.amount,
+
+                currency:
+                    orderData.currency,
+
+                name:
+                    "GS QCAB",
+
+                description:
+                    "GS QCAB Premium - 6 Months",
+
+                order_id:
+                    orderData.order_id,
+
+                prefill: {
+
+                    email:
+                        user.email || ""
+
+                },
+
+                theme: {
+
+                    color:
+                        "#16a34a"
+
+                },
+
+
+                /* -------------------------------------
+                   PAYMENT SUCCESS
+                ------------------------------------- */
+
+                handler:
+                    async function(response) {
+
+                        try {
+
+                            setStatus(
+                                "Payment successful. Verifying payment..."
+                            );
+
+
+                            /* -----------------------------
+                               4. VERIFY PAYMENT SERVER-SIDE
+                            ----------------------------- */
+
+                            const verifyResponse =
+                                await fetch(
+                                    VERIFY_PAYMENT_URL,
+                                    {
+                                        method: "POST",
+
+                                        headers: {
+
+                                            "Authorization":
+                                                "Bearer " +
+                                                accessToken,
+
+                                            "Content-Type":
+                                                "application/json"
+
+                                        },
+
+                                        body:
+                                            JSON.stringify({
+
+                                                razorpay_order_id:
+                                                    response.razorpay_order_id,
+
+                                                razorpay_payment_id:
+                                                    response.razorpay_payment_id,
+
+                                                razorpay_signature:
+                                                    response.razorpay_signature
+
+                                            })
+
+                                    }
+                                );
+
+
+                            const verifyData =
+                                await verifyResponse.json();
+
+
+                            if (!verifyResponse.ok) {
+
+                                throw new Error(
+                                    verifyData.error ||
+                                    "Payment verification failed."
+                                );
+
+                            }
+
+
+                            /* -----------------------------
+                               5. SUCCESS
+                            ----------------------------- */
+
+                            setStatus(
+                                "Premium activated successfully!"
+                            );
+
+
+                            alert(
+                                "Payment successful! Your GS Premium access is now active for 6 months."
+                            );
+
+
+                            window.location.href =
+                                "index.html";
+
+
+                        } catch(error) {
+
+                            console.error(
+                                "Verification error:",
+                                error
+                            );
+
+
+                            setStatus(
+                                "Payment received, but verification failed. Please contact support."
+                            );
+
+
+                            alert(
+                                "Payment was received, but we could not verify it automatically. Please contact support and provide your Razorpay payment ID: " +
+                                response.razorpay_payment_id
+                            );
+
+
+                            button.disabled = false;
+
+                        }
+
+                    },
+
+
+                /* -------------------------------------
+                   PAYMENT MODAL CLOSED
+                ------------------------------------- */
+
+                modal: {
+
+                    ondismiss:
+                        function() {
+
+                            setStatus("");
+
+                            button.disabled =
+                                false;
+
+                        }
+
+                }
+
+            };
+
+
+            const razorpay =
+                new Razorpay(options);
+
+
+            razorpay.on(
+                "payment.failed",
+                function(response) {
+
+                    console.error(
+                        "Razorpay payment failed:",
+                        response.error
+                    );
+
+
+                    setStatus(
+                        "Payment failed. Please try again."
+                    );
+
+
+                    alert(
+                        "Payment failed. Please try again."
+                    );
+
+
+                    button.disabled =
+                        false;
+
+                }
+            );
+
+
+            razorpay.open();
+
+
+        } catch(error) {
+
+            console.error(
+                "Payment error:",
+                error
+            );
+
+
+            setStatus(
+                "Unable to start payment."
+            );
+
+
+            alert(
+                error.message ||
+                "Unable to start payment. Please try again."
+            );
+
+
+            button.disabled =
+                false;
+
+        }
+
+    }
+
+</script>
 
 </body>
-
 </html>
+
+
