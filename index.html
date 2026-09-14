@@ -8,7 +8,7 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>GS QCAB Generator</title>
+<title>GS PYQs + QCAB Generator</title>
 
 <style>
 
@@ -403,17 +403,6 @@ button.danger:hover {
 
     box-shadow: 0 8px 25px rgba(22, 163, 74, 0.10);
 
-}
-
-#backToMainButton {
-    display: block;
-    width: 100%;
-    margin-top: 25px;
-    background: #166534;
-}
-
-#backToMainButton:hover {
-    background: #14532d;
 }
 
 #loginScreen h2 {
@@ -1000,6 +989,67 @@ button.danger:hover {
 
 }
 
+
+/* =========================
+   BACK TO LANDING PAGE
+========================== */
+
+#backToMainContainer {
+    position: fixed;
+    bottom: 20px;
+    left: 0;
+    width: 100%;
+    text-align: center;
+    margin: 0;
+    z-index: 1000;
+}
+
+#backToMainButton {
+    background: transparent;
+    color: var(--primary);
+    font-weight: 600;
+    padding: 6px 12px;
+}
+
+#backToMainButton:hover {
+    background: transparent;
+    color: var(--primary-dark);
+    text-decoration: underline;
+    transform: none;
+}
+
+
+.locked-question {
+    background: #f8f7ff;
+    border-color: #e5e7eb;
+}
+
+.locked-question label {
+    cursor: default;
+}
+
+.locked-question input[type="checkbox"] {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+.locked-preview {
+    color: #4b5563;
+    font-style: italic;
+}
+
+.lock-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 3px 8px;
+    border-radius: 12px;
+    background: #ede9fe;
+    color: #5b21b6;
+    font-size: 12px;
+    font-weight: 700;
+    font-style: normal;
+}
+
 </style>
 
 </head>
@@ -1012,7 +1062,11 @@ button.danger:hover {
 
 <div id="loginScreen">
 
-<h2>GS QCAB</h2>
+<h2>GS PYQs + QCAB</h2>
+
+<p id="loginInstruction" style="text-align:center; color:#6b7280; font-size:14px; margin:-12px 0 22px;">
+    Please create account to continue, login if already created.
+</p>
 
 <div id="loginForm">
 
@@ -1116,13 +1170,17 @@ button.danger:hover {
 
 <p id="loginMessage"></p>
 
-<button
-    id="backToMainButton"
-    type="button"
-    onclick="window.location.href='https://sankalpkgaidhani-art.github.io/main-page/';"
->
-    ← Back to Main Page
-</button>
+
+<div id="backToMainContainer">
+    <button
+        id="backToMainButton"
+        type="button"
+        onclick="window.location.href='https://sankalpkgaidhani-art.github.io/gs-landingpage/';"
+    >
+        ← Back
+    </button>
+</div>
+
 
 </div>
 
@@ -1174,7 +1232,7 @@ Upgrade to Premium
 <div class="container">
 
 
-<h1>GS QCAB Generator</h1>
+<h1>GS PYQs + QCAB Generator</h1>
 
 <p class="subtitle">
     Generate UPSC GS Question-Cum-Answer Booklets
@@ -1756,7 +1814,7 @@ function updatePlanMessage(accessLevel) {
     if (accessLevel === "free") {
 
         planMessage.textContent =
-            "Free Plan: You can view questions from all available years. Only 2026 questions can be used to generate a QCAB.";
+            "Free Plan: You have access to 2026 questions only. Upgrade to premium for unlimited access. 🔓";
 
         planMessage.style.display = "block";
 
@@ -1765,7 +1823,7 @@ function updatePlanMessage(accessLevel) {
     } else if (accessLevel === "paid") {
 
         planMessage.textContent =
-            "Paid Plan: You can view and generate QCABs from all available years.";
+            "Paid Plan:You have access to all available questions. ✅";
 
         planMessage.style.display = "block";
 
@@ -2917,6 +2975,14 @@ function displayQuestions(questions) {
     }
 
 
+    const accessLevel =
+        currentAccessLevel || "free";
+
+    const isPremiumUser =
+        accessLevel === "paid" ||
+        accessLevel === "admin";
+
+
     questions.forEach(
         function (question, index) {
 
@@ -2926,6 +2992,18 @@ function displayQuestions(questions) {
 
             wrapper.className =
                 "question";
+
+
+            const is2026 =
+                Number(question.year) === 2026;
+
+            const canSelect =
+                isPremiumUser || is2026;
+
+
+            if (!canSelect) {
+                wrapper.classList.add("locked-question");
+            }
 
 
             const label =
@@ -2947,6 +3025,9 @@ function displayQuestions(questions) {
             checkbox.dataset.question =
                 JSON.stringify(question);
 
+
+            checkbox.disabled =
+                !canSelect;
 
 
             checkbox.addEventListener(
@@ -2975,8 +3056,42 @@ function displayQuestions(questions) {
                 document.createElement("div");
 
 
-            text.textContent =
-                question.question_text || "";
+            if (canSelect) {
+
+                text.textContent =
+                    question.question_text || "";
+
+            } else {
+
+                const fullText =
+                    question.question_text || "";
+
+                const words =
+                    fullText.trim().split(/\s+/);
+
+                const preview =
+                    words.slice(0, 4).join(" ");
+
+                text.textContent =
+                    preview +
+                    (words.length > 4 ? "…" : "");
+
+                text.className =
+                    "locked-preview";
+
+
+                const lockBadge =
+                    document.createElement("span");
+
+                lockBadge.className =
+                    "lock-badge";
+
+                lockBadge.textContent =
+                    " 🔒 ";
+
+                text.appendChild(lockBadge);
+
+            }
 
 
             content.appendChild(meta);
@@ -3011,102 +3126,6 @@ function displayQuestions(questions) {
     updateSelectedCount();
 
 }
-
-
-/* =========================================
-   SELECT ALL
-========================================= */
-
-document
-    .getElementById("selectAll")
-    .addEventListener(
-        "click",
-        function () {
-
-            document
-                .querySelectorAll(
-                    ".question-checkbox"
-                )
-                .forEach(
-                    function (checkbox) {
-
-                        const question =
-                            JSON.parse(
-                                checkbox.dataset.question
-                            );
-
-
-                        /*
-                         * Free users:
-                         * select only 2026.
-                         *
-                         * Paid/Admin:
-                         * select every visible question.
-                         */
-
-                        if (
-                            currentAccessLevel === "free" &&
-                            Number(question.year) !== 2026
-                        ) {
-
-                            checkbox.checked =
-                                false;
-
-                            return;
-
-                        }
-
-
-                        if (!checkbox.disabled) {
-
-                            checkbox.checked =
-                                true;
-
-                        }
-
-                    }
-                );
-
-
-            updateSelectedCount();
-
-        }
-    );
-
-
-/* =========================================
-   CLEAR ALL
-========================================= */
-
-document
-    .getElementById("clearAll")
-    .addEventListener(
-        "click",
-        function () {
-
-            document
-                .querySelectorAll(
-                    ".question-checkbox"
-                )
-                .forEach(
-                    function (checkbox) {
-
-                        checkbox.checked =
-                            false;
-
-                    }
-                );
-
-
-            updateSelectedCount();
-
-        }
-    );
-
-
-/* =========================================
-   SELECTED COUNT
-========================================= */
 
 function updateSelectedCount() {
 
