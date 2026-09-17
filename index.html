@@ -1237,6 +1237,10 @@ Upgrade to Premium
     Logout
 </button>
 
+    <div id="loggedInEmail" style="margin-top: 6px; font-size: 12px; color: #6b7280; line-height: 1.4;">
+        Logged in as: <span id="userEmail"></span>
+    </div>
+
 
 </div>
 
@@ -1702,6 +1706,9 @@ const mainContent =
 const logoutContainer =
     document.getElementById("logoutContainer");
 
+const userEmail =
+    document.getElementById("userEmail");
+
 const loginMessage =
     document.getElementById("loginMessage");
 
@@ -1968,6 +1975,9 @@ async function updateAuthUI() {
 
         logoutContainer.style.display = "block";
 
+        if (userEmail) {
+            userEmail.textContent = session.user.email || "";
+        }
 
         await checkUserAccess();
 
@@ -1978,6 +1988,10 @@ async function updateAuthUI() {
         mainContent.style.display = "none";
 
         logoutContainer.style.display = "none";
+
+        if (userEmail) {
+            userEmail.textContent = "";
+        }
 
         planMessage.style.display = "none";
 
