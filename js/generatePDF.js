@@ -1,3 +1,4 @@
+
 document.getElementById("generateQCAB").addEventListener("click", async () => {
 
     // ==========================================
@@ -78,26 +79,26 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
     try {
 
         const response = await fetch(
-    "https://uggewxzqnwjzhebfempx.supabase.co/functions/v1/get-questions",
-    {
-        method: "POST",
+            "https://uggewxzqnwjzhebfempx.supabase.co/functions/v1/get-questions",
+            {
+                method: "POST",
 
-        headers: {
-            "Content-Type": "application/json",
+                headers: {
+                    "Content-Type": "application/json",
 
-            "apikey":
-                "sb_publishable_xHqv4APZiUkYh0wSDO93zg_7y8_uHjP",
+                    "apikey":
+                        "sb_publishable_xHqv4APZiUkYh0wSDO93zg_7y8_uHjP",
 
-            "Authorization":
-                "Bearer " + session.access_token
-        },
+                    "Authorization":
+                        "Bearer " + session.access_token
+                },
 
-        body: JSON.stringify({
-            paper: "Paper I",
-            year: 2026
-        })
-    }
-);
+                body: JSON.stringify({
+                    paper: "Paper I",
+                    year: 2026
+                })
+            }
+        );
 
         const result = await response.json();
 
@@ -413,6 +414,13 @@ async function generateQCABPDF(questions) {
 
     const bottomMargin = 282;
 
+    // ANSWER PAGE MARGINS ONLY
+    const answerLeftMargin = 15;
+    const answerRightMargin = 195;
+    const answerTopMargin = 0;
+    const answerBottomMargin = 297;
+    const answerContentTop = 10;
+
     doc.setFont(
         "Times",
         "Roman"
@@ -425,8 +433,54 @@ async function generateQCABPDF(questions) {
     // PART 1: QUESTION LISTING
     // ==========================================
 
+    // DETAILS BOX ON THE FIRST PAGE ONLY
+    const detailsBoxX = leftMargin;
+    const detailsBoxY = topMargin;
+    const detailsBoxWidth = rightMargin - leftMargin;
+    const detailsBoxHeight = 50;
+
+    doc.setLineWidth(0.3);
+
+    doc.rect(
+        detailsBoxX,
+        detailsBoxY,
+        detailsBoxWidth,
+        detailsBoxHeight
+    );
+
+    doc.setFontSize(10);
+
+    // ROW 1: NAME
+    doc.text("Name:", 28, 21);
+    doc.line(42, 22, 182, 22);
+
+    // ROW 2: TOPIC
+    doc.text("Topic:", 28, 31);
+    doc.line(42, 32, 182, 32);
+
+    // ROW 3: NUMBER OF QUESTIONS + ESTIMATED TIME
+    doc.text("No of questions:", 28, 41);
+    doc.line(57, 42, 95, 42);
+
+    doc.text("Estimated time:", 105, 41);
+    doc.line(133, 42, 182, 42);
+
+    // ROW 4: START TIME + FINISH TIME
+    doc.text("Start Time:", 28, 51);
+    doc.line(49, 52, 95, 52);
+
+    doc.text("Finish Time:", 105, 51);
+    doc.line(129, 52, 182, 52);
+
+    // ROW 5: DATE
+    doc.text("Date:", 28, 61);
+    doc.line(39, 62, 95, 62);
+
+    doc.setFontSize(12);
+
+    // KEEP A 3.5 CM GAP BELOW THE BOX
     let currentY =
-        topMargin;
+        topMargin + detailsBoxHeight + 35;
 
     const localWidth =
         rightMargin -
@@ -609,20 +663,22 @@ async function generateQCABPDF(questions) {
         }
 
     }
+
+
     // ==========================================
-// FIRST PAGE FOOTER
-// ==========================================
+    // FIRST PAGE FOOTER
+    // ==========================================
 
-doc.setFontSize(9);
+    doc.setFontSize(9);
 
-doc.text(
-    "Made by DoomsDay QCAB Generator - for more info contact : cds2gc@gmail.com",
-    105,
-    288,
-    { align: "center" }
-);
+    doc.text(
+        "Made by DoomsDay QCAB Generator - cds2gc@gmail.com",
+        105,
+        288,
+        { align: "center" }
+    );
 
-doc.setFontSize(22);
+    doc.setFontSize(22);
 
 
     // ==========================================
@@ -645,32 +701,20 @@ doc.setFontSize(22);
 
             doc.setLineWidth(0.3);
 
+            // VERTICAL LINES: 1.5 CM FROM EACH SIDE
             doc.line(
-                leftMargin,
-                topMargin,
-                leftMargin,
-                bottomMargin
+                answerLeftMargin,
+                answerTopMargin,
+                answerLeftMargin,
+                answerBottomMargin
             );
 
             doc.line(
-                rightMargin,
-                topMargin,
-                rightMargin,
-                bottomMargin
+                answerRightMargin,
+                answerTopMargin,
+                answerRightMargin,
+                answerBottomMargin
             );
-
-
-            const footerText =
-                `XXXX-${q.question_id || `CUSTOM_${q.question_number}`}`;
-
-            doc.setFontSize(8);
-
-            doc.text(
-                footerText,
-                leftMargin - 10,
-                bottomMargin + 3
-            );
-            
 
 
             // ==========================================
@@ -683,18 +727,18 @@ doc.setFontSize(22);
 
                 doc.text(
                     `Q. ${q.question_number}`,
-                    leftMargin - 15,
-                    topMargin + 5
+                    answerLeftMargin - 10,
+                    answerContentTop + 5
                 );
 
 
                 const localQuestionWidth =
-                    rightMargin -
-                    leftMargin -
+                    answerRightMargin -
+                    answerLeftMargin -
                     4;
 
                 let questionBottom =
-                    topMargin + 5;
+                    answerContentTop + 5;
 
 
                 if (hasRichQuestion(q)) {
@@ -708,14 +752,14 @@ doc.setFontSize(22);
                             addCanvasImage(
                                 doc,
                                 canvas,
-                                leftMargin + 2,
-                                topMargin,
+                                answerLeftMargin + 2,
+                                answerContentTop,
                                 localQuestionWidth,
                                 55
                             );
 
                         questionBottom =
-                            topMargin +
+                            answerContentTop +
                             14 +
                             image.height;
 
@@ -737,12 +781,12 @@ doc.setFontSize(22);
 
                         doc.text(
                             splitText,
-                            leftMargin + 2,
-                            topMargin + 5
+                            answerLeftMargin + 2,
+                            answerContentTop + 5
                         );
 
                         questionBottom =
-                            topMargin +
+                            answerContentTop +
                             5 +
                             splitText.length * 6;
                     }
@@ -759,50 +803,44 @@ doc.setFontSize(22);
 
                     doc.text(
                         splitText,
-                        leftMargin + 2,
-                        topMargin + 5
+                        answerLeftMargin + 2,
+                        answerContentTop + 5
                     );
 
                     questionBottom =
-                        topMargin +
+                        answerContentTop +
                         5 +
                         splitText.length * 6;
                 }
-                
 
 
                 // ==========================================
-                // MARKS / YEAR
+                // MARKS / YEAR — YEAR BELOW MARKS ON THE RIGHT
                 // ==========================================
 
-                doc.setFontSize(12);
+                doc.setFontSize(8);
 
-                const metadata = [
+                if (q.marks != null) {
+                    doc.text(
+                        `${q.marks} M`,
+                        answerRightMargin + 2,
+                        answerContentTop + 5
+                    );
+                }
 
-                    q.marks != null
-                        ? `${q.marks} M`
-                        : "",
-
-                    q.year
-                        ? `${q.year}`
-                        : ""
-
-                ]
-                    .filter(Boolean)
-                    .join(" / ");
-
-
-                doc.text(
-                    metadata,
-                    rightMargin + 2,
-                    topMargin + 5
-                );
+                if (q.year) {
+                    doc.text(
+                        `${q.year}`,
+                        answerRightMargin + 2,
+                        answerContentTop + 10
+                    );
+                }
 
 
                 // Answer-writing area
                 if (
                     questionBottom <
-                    bottomMargin - 4
+                    answerBottomMargin - 4
                 ) {
 
                     doc.setFontSize(8);
@@ -825,18 +863,19 @@ doc.setFontSize(22);
 
                 const localWidth = 23;
 
-                const splitText =
-                    doc.splitTextToSize(
-                        "Candidates must not write on this margin",
-                        localWidth
-                    );
+                const splitText = [
+    "Candidates",
+    "must not",
+    "write on",
+    "this margin"
+];
 
                 doc.setFontSize(8);
 
                 doc.text(
                     splitText,
-                    rightMargin + 2,
-                    topMargin + 5
+                    answerRightMargin + 2,
+                    answerContentTop + 5
                 );
             }
 
