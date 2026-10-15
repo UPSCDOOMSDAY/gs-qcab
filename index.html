@@ -3179,6 +3179,35 @@ function updateSelectedCount() {
 
 }
 
+/* =========================================
+   SELECT ALL / CLEAR ALL QUESTIONS
+========================================= */
+
+document.getElementById("selectAll").addEventListener("click", function () {
+
+    document.querySelectorAll(".question-checkbox:not(:disabled)").forEach(
+        function (checkbox) {
+            checkbox.checked = true;
+        }
+    );
+
+    updateSelectedCount();
+
+});
+
+
+document.getElementById("clearAll").addEventListener("click", function () {
+
+    document.querySelectorAll(".question-checkbox").forEach(
+        function (checkbox) {
+            checkbox.checked = false;
+        }
+    );
+
+    updateSelectedCount();
+
+});
+
 
 /* =========================================
    GET SELECTED QUESTIONS
