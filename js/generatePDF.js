@@ -1,9 +1,10 @@
+// ==========================================
+// GENERATE QCAB BUTTON
+// ==========================================
 
 document.getElementById("generateQCAB").addEventListener("click", async () => {
 
-    // ==========================================
-    // CHECK LOGIN BEFORE ANY PDF GENERATION
-    // ==========================================
+    // CHECK LOGIN
 
     if (!window.supabaseClient) {
         alert("Supabase client not loaded.");
@@ -26,9 +27,7 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
         return;
     }
 
-    // ==========================================
     // CUSTOM QUESTIONS
-    // ==========================================
 
     if (
         typeof window.isCustomQuestionMode === "function" &&
@@ -54,9 +53,7 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
         return;
     }
 
-    // ==========================================
-    // PYQ QUESTIONS
-    // ==========================================
+    // GET SELECTED PYQ QUESTIONS
 
     if (typeof window.getSelectedQuestions !== "function") {
         alert("Selection logic not loaded!");
@@ -65,14 +62,28 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
 
     const selectedQuestions = window.getSelectedQuestions();
 
+    if (!Array.isArray(selectedQuestions)) return;
+
     if (selectedQuestions.length === 0) {
         alert("Select questions first!");
         return;
     }
 
-    // ==========================================
+    // VALIDATE MARKS FOR UNMARKED QUESTIONS
+
+    const questionMissingMarks = selectedQuestions.some(q =>
+        q._marksChosenByUser &&
+        ![10, 15].includes(Number(q.marks))
+    );
+
+    if (questionMissingMarks) {
+        alert(
+            "Choose 10M or 15M for every selected question without marks."
+        );
+        return;
+    }
+
     // CHECK FREE / PAID / ADMIN ACCESS
-    // ==========================================
 
     let accessLevel = "free";
 
@@ -94,11 +105,17 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
                 },
 
                 body: JSON.stringify({
-                    paper: "Paper I",
+                    paper: document.getElementById("paperSelect").value || "GS1",
                     year: 2026
                 })
             }
         );
+
+        if (!response.ok) {
+            throw new Error(
+                "Access check failed: " + response.status
+            );
+        }
 
         const result = await response.json();
 
@@ -120,10 +137,7 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
         return;
     }
 
-
-    // ==========================================
-    // FREE PLAN — ONLY 2026 CAN BE GENERATED
-    // ==========================================
+    // FREE PLAN — ONLY 2026
 
     if (accessLevel === "free") {
 
@@ -142,13 +156,10 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
         }
     }
 
-
-    // ==========================================
-    // KEEP CURRENT MARKS-BASED ORDERING
-    // ==========================================
+    // SORT QUESTIONS BY MARKS
 
     selectedQuestions.sort(
-        (a, b) => a.marks - b.marks
+        (a, b) => Number(a.marks) - Number(b.marks)
     );
 
     selectedQuestions.forEach((q, i) => {
@@ -156,6 +167,7 @@ document.getElementById("generateQCAB").addEventListener("click", async () => {
     });
 
     await generateQCABPDF(selectedQuestions);
+
 });
 
 
@@ -167,8 +179,11 @@ function getAnswerPages(q) {
 
     const marks = Number(q.marks) || 0;
 
+    if (marks === 10) return 2;
+
     if (marks === 15) return 3;
 
+    // Preserve any legacy question with fixed marks above 15.
     if (marks >= 20) return 4;
 
     return 2;
@@ -187,6 +202,7 @@ function escapePDFHTML(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+
 }
 
 
@@ -198,6 +214,7 @@ function hasRichQuestion(q) {
 
     return !!q.question_html &&
         q.question_html.includes("<img");
+
 }
 
 
@@ -211,6 +228,7 @@ function waitForImages(container) {
         [...container.querySelectorAll("img")];
 
     return Promise.all(
+
         images.map(img => {
 
             if (
@@ -229,7 +247,9 @@ function waitForImages(container) {
             });
 
         })
+
     );
+
 }
 
 
@@ -247,6 +267,7 @@ async function renderQuestionToCanvas(
         throw new Error(
             "html2canvas is not loaded. Please check your internet connection."
         );
+
     }
 
     const host =
@@ -258,31 +279,18 @@ async function renderQuestionToCanvas(
     host.style.cssText = [
 
         "position:fixed",
-
         "left:-100000px",
-
         "top:0",
-
         `width:${widthPx}px`,
-
         "padding:0",
-
         "margin:0",
-
         "background:#fff",
-
         "color:#111",
-
         "font-family:Times New Roman, serif",
-
         "font-size:30px",
-
         "line-height:1.45",
-
         "white-space:normal",
-
         "overflow:visible",
-
         "z-index:-1"
 
     ].join(";");
@@ -318,11 +326,8 @@ async function renderQuestionToCanvas(
             host,
             {
                 backgroundColor: "#ffffff",
-
                 scale: 2,
-
                 useCORS: true,
-
                 logging: false
             }
         );
@@ -332,6 +337,7 @@ async function renderQuestionToCanvas(
         host.remove();
 
     }
+
 }
 
 
@@ -366,6 +372,7 @@ function addCanvasImage(
 
         heightMm =
             maxHeightMm;
+
     }
 
     const imageData =
@@ -386,6 +393,7 @@ function addCanvasImage(
         width: widthMm,
         height: heightMm
     };
+
 }
 
 
@@ -414,11 +422,16 @@ async function generateQCABPDF(questions) {
 
     const bottomMargin = 282;
 
-    // ANSWER PAGE MARGINS ONLY
+    // ANSWER PAGE MARGINS
+
     const answerLeftMargin = 15;
+
     const answerRightMargin = 195;
+
     const answerTopMargin = 0;
+
     const answerBottomMargin = 297;
+
     const answerContentTop = 10;
 
     doc.setFont(
@@ -433,10 +446,15 @@ async function generateQCABPDF(questions) {
     // PART 1: QUESTION LISTING
     // ==========================================
 
-    // DETAILS BOX ON THE FIRST PAGE ONLY
+    // DETAILS BOX ON FIRST PAGE
+
     const detailsBoxX = leftMargin;
+
     const detailsBoxY = topMargin;
-    const detailsBoxWidth = rightMargin - leftMargin;
+
+    const detailsBoxWidth =
+        rightMargin - leftMargin;
+
     const detailsBoxHeight = 50;
 
     doc.setLineWidth(0.3);
@@ -451,34 +469,47 @@ async function generateQCABPDF(questions) {
     doc.setFontSize(10);
 
     // ROW 1: NAME
+
     doc.text("Name:", 28, 21);
+
     doc.line(42, 22, 182, 22);
 
     // ROW 2: TOPIC
+
     doc.text("Topic:", 28, 31);
+
     doc.line(42, 32, 182, 32);
 
     // ROW 3: NUMBER OF QUESTIONS + ESTIMATED TIME
+
     doc.text("No of questions:", 28, 41);
+
     doc.line(57, 42, 95, 42);
 
     doc.text("Estimated time:", 105, 41);
+
     doc.line(133, 42, 182, 42);
 
     // ROW 4: START TIME + FINISH TIME
+
     doc.text("Start Time:", 28, 51);
+
     doc.line(49, 52, 95, 52);
 
     doc.text("Finish Time:", 105, 51);
+
     doc.line(129, 52, 182, 52);
 
     // ROW 5: DATE
+
     doc.text("Date:", 28, 61);
+
     doc.line(39, 62, 95, 62);
 
     doc.setFontSize(12);
 
-    // KEEP A 3.5 CM GAP BELOW THE BOX
+    // GAP BELOW DETAILS BOX
+
     let currentY =
         topMargin + detailsBoxHeight + 35;
 
@@ -489,6 +520,10 @@ async function generateQCABPDF(questions) {
 
     const lineHeight = 6;
 
+
+    // ==========================================
+    // QUESTION LIST
+    // ==========================================
 
     for (const q of questions) {
 
@@ -535,6 +570,7 @@ async function generateQCABPDF(questions) {
 
                     currentY =
                         topMargin;
+
                 }
 
 
@@ -599,6 +635,7 @@ async function generateQCABPDF(questions) {
 
                     currentY =
                         topMargin;
+
                 }
 
                 doc.text(
@@ -615,6 +652,7 @@ async function generateQCABPDF(questions) {
 
                 currentY +=
                     totalHeight;
+
             }
 
         } else {
@@ -644,6 +682,7 @@ async function generateQCABPDF(questions) {
 
                 currentY =
                     topMargin;
+
             }
 
             doc.text(
@@ -660,6 +699,7 @@ async function generateQCABPDF(questions) {
 
             currentY +=
                 totalHeight;
+
         }
 
     }
@@ -701,7 +741,8 @@ async function generateQCABPDF(questions) {
 
             doc.setLineWidth(0.3);
 
-            // VERTICAL LINES: 1.5 CM FROM EACH SIDE
+            // VERTICAL LINES
+
             doc.line(
                 answerLeftMargin,
                 answerTopMargin,
@@ -789,6 +830,7 @@ async function generateQCABPDF(questions) {
                             answerContentTop +
                             5 +
                             splitText.length * 6;
+
                     }
 
                 } else {
@@ -811,33 +853,39 @@ async function generateQCABPDF(questions) {
                         answerContentTop +
                         5 +
                         splitText.length * 6;
+
                 }
 
 
                 // ==========================================
-                // MARKS / YEAR — YEAR BELOW MARKS ON THE RIGHT
+                // MARKS / YEAR — RIGHT SIDE
                 // ==========================================
 
                 doc.setFontSize(8);
 
                 if (q.marks != null) {
+
                     doc.text(
                         `${q.marks} M`,
                         answerRightMargin + 2,
                         answerContentTop + 5
                     );
+
                 }
 
                 if (q.year) {
+
                     doc.text(
                         `${q.year}`,
                         answerRightMargin + 2,
                         answerContentTop + 10
                     );
+
                 }
 
 
-                // Answer-writing area
+                // ANSWER-WRITING AREA
+
                 if (
                     questionBottom <
                     answerBottomMargin - 4
@@ -856,19 +904,22 @@ async function generateQCABPDF(questions) {
                         0,
                         0
                     );
+
                 }
 
 
             } else {
 
+                // SUBSEQUENT ANSWER PAGES
+
                 const localWidth = 23;
 
                 const splitText = [
-    "Candidates",
-    "must not",
-    "write on",
-    "this margin"
-];
+                    "Candidates",
+                    "must not",
+                    "write on",
+                    "this margin"
+                ];
 
                 doc.setFontSize(8);
 
@@ -877,6 +928,7 @@ async function generateQCABPDF(questions) {
                     answerRightMargin + 2,
                     answerContentTop + 5
                 );
+
             }
 
         }
@@ -894,6 +946,7 @@ async function generateQCABPDF(questions) {
     doc.save(
         "QCAB.pdf"
     );
+
 }
 
 
@@ -902,7 +955,7 @@ async function generateQCABPDF(questions) {
 // ==========================================
 
 document
-    .getElementById("downloadPDF")
+    .getElementById("downloadQCAB")
     .addEventListener(
         "click",
         () => {
@@ -914,9 +967,10 @@ document
                 );
 
                 document
-                    .getElementById("downloadPDF")
+                    .getElementById("downloadQCAB")
                     .style.display =
                     "none";
+
             }
 
         }
