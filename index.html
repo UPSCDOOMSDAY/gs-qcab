@@ -1074,6 +1074,12 @@ body:after{width:300px;height:300px;right:-120px;bottom:8%;border:1px solid rgba
 @media(prefers-reduced-motion:reduce){body:before,body:after,.card:before,#loginScreen:before,#loginScreen:after,#loginButton,#signupButton,#loginButton:after,#signupButton:after,#upgradePremiumButton,#upgradePremiumButton:after,.mode-button.active,#planMessage:after{animation:none!important}}
 @media(max-width:600px){body:before{width:250px;height:250px;left:-145px}body:after{width:220px;height:220px;right:-120px}#upgradePremiumButton{padding:7px 11px;font-size:12px}}
 
+
+.mark-choice-row { display:flex; gap:7px; align-items:center; flex-wrap:wrap; margin-top:9px; }
+.mark-choice-label { font-size:12px; color:#6b7280; font-weight:600; }
+.mark-choice-button { width:auto; padding:4px 10px; font-size:12px; border:1px solid #86efac; background:#f0fdf4; color:#166534; border-radius:6px; }
+.mark-choice-button:hover { background:#dcfce7; transform:none; }
+.mark-choice-button.active { background:#16a34a; color:white; border-color:#15803d; }
 </style>
 
 </head>
@@ -3082,8 +3088,8 @@ function displayQuestions(questions) {
                 "question-meta";
 
 
-            meta.textContent =
-                `${question.year || ""} | ${question.marks || ""} Marks | ${question.word_limit || ""} Words`;
+            const hasFixedMarks = question.marks !== null && question.marks !== undefined && String(question.marks).trim() !== "";
+            meta.textContent = [question.year || "", hasFixedMarks ? `${question.marks} Marks` : "", question.word_limit ? `${question.word_limit} Words` : ""].filter(Boolean).join(" | ");
 
 
             const text =
@@ -3129,8 +3135,37 @@ function displayQuestions(questions) {
 
 
             content.appendChild(meta);
-
             content.appendChild(text);
+
+            if (!hasFixedMarks && canSelect) {
+                const markChoiceRow = document.createElement("div");
+                markChoiceRow.className = "mark-choice-row";
+                const markLabel = document.createElement("span");
+                markLabel.className = "mark-choice-label";
+                markLabel.textContent = "Choose marks:";
+                markChoiceRow.appendChild(markLabel);
+
+                [10, 15].forEach(function(mark) {
+                    const button = document.createElement("button");
+                    button.type = "button";
+                    button.className = "mark-choice-button";
+                    button.textContent = mark + "M";
+                    button.setAttribute("aria-pressed", "false");
+                    button.addEventListener("click", function(event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        markChoiceRow.querySelectorAll(".mark-choice-button").forEach(function(b) {
+                            b.classList.remove("active");
+                            b.setAttribute("aria-pressed", "false");
+                        });
+                        button.classList.add("active");
+                        button.setAttribute("aria-pressed", "true");
+                        checkbox.dataset.selectedMarks = String(mark);
+                    });
+                    markChoiceRow.appendChild(button);
+                });
+                content.appendChild(markChoiceRow);
+            }
 
 
             label.appendChild(checkbox);
@@ -3226,9 +3261,13 @@ window.getSelectedQuestions =
                 .map(
                     function (checkbox) {
 
-                        return JSON.parse(
-                            checkbox.dataset.question
-                        );
+                        const question = JSON.parse(checkbox.dataset.question);
+                        const hasFixedMarks = question.marks !== null && question.marks !== undefined && String(question.marks).trim() !== "";
+                        if (!hasFixedMarks) {
+                            question.marks = checkbox.dataset.selectedMarks || "";
+                            question._marksChosenByUser = true;
+                        }
+                        return question;
 
                     }
                 );
